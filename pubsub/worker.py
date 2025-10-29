@@ -11,6 +11,9 @@ from pubsub.temporal.registry import get_activities, get_workflows
 from pubsub.temporal.settings import TemporalSettings
 
 
+log = logging.getLogger(__name__)
+
+
 def _import_package_modules(package_name: str) -> None:
     try:
         pkg = importlib.import_module(package_name)
@@ -50,6 +53,7 @@ async def run_worker() -> None:
         workflows=workflows,
         activities=activities,
     ):
+        log.info("Worker started aaa")
         await asyncio.Event().wait()
 
 
