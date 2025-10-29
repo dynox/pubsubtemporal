@@ -1,0 +1,128 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_DB: temporal
+    ports:
+      - "5432:5432"
+    volumes:
+      - temporal-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgres
+      - LOG_LEVEL=info
+      - LOG_FORMAT=pretty
+    ports:
+      - "7233:7233"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_GRPC_INSECURE=true
+    ports:
+      - "8233:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
+  temporal-admin-tools:
+    image: temporalio/admin-tools:latest
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_TLS_DISABLE_HOST_VERIFICATION=true
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    stdin_open: true
+    tty: true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
+  worker:
+    build: .
+    depends_on:
+      - temporal
+    env_file:
+      - .env
+    command: ["python", "-m", "pubsub.worker"]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./pubsub
+          target: /app/pubsub
+          action: sync
+        - path: ./pyproject.toml
+          action: rebuild
+        - path: ./uv.lock
+          action: rebuild
+        - path: ./Dockerfile
+          action: rebuild
+        - path: ./.env
+          target: /app/.env
+          action: sync+restart
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
+volumes:
+  temporal-postgres:
+
+
