@@ -1,10 +1,10 @@
 from __future__ import annotations
+
 import logging
 
 from temporalio import workflow
 
 from pubsub.temporal.registry import workflow as register_workflow
-
 
 log = logging.getLogger(__name__)
 

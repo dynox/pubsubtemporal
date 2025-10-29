@@ -14,7 +14,7 @@ help:
 	@echo "  worker-restart  - Restart worker"
 	@echo "  ps              - Show compose services status"
 	@echo "  watch           - Start full stack with compose watch"
-	@echo "  wf-producer     - Start ProducerWorkflow (no parameters) via tctl"
+	@echo "  wf-producer     - Start ProducerWorkflow (no parameters) via Temporal CLI"
 
 up:
 	$(COMPOSE) up -d --build
@@ -53,6 +53,6 @@ watch:
 	$(COMPOSE) up --watch
 
 wf-producer:
-	$(COMPOSE) exec temporal-admin-tools tctl --ns default workflow start \
-	  --taskqueue pubsub-task-queue --workflow_type ProducerWorkflow --workflow_id producer-$$RANDOM
+	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
+	  --tls=false --namespace default --task-queue pubsub-task-queue --type ProducerWorkflow --workflow-id producer-$$RANDOM
 
