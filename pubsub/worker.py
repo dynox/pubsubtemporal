@@ -11,7 +11,6 @@ from pubsub.temporal.converter import create_data_converter
 from pubsub.temporal.registry import get_activities, get_workflows
 from pubsub.temporal.settings import TemporalSettings
 
-
 log = logging.getLogger(__name__)
 
 
