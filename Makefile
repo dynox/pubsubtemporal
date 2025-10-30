@@ -2,7 +2,7 @@ SHELL := /bin/zsh
 
 COMPOSE := docker compose
 
-.PHONY: help up down restart logs worker worker-logs worker-restart ps watch watch-worker wf-producer-activity wf-producer-workflow
+.PHONY: help up down restart logs worker worker-logs worker-restart ps watch watch-worker wf-producer-activity wf-producer-workflow wf-producer-signal
 
 help:
 	@echo "Available targets:"
@@ -16,6 +16,7 @@ help:
 	@echo "  watch                   - Start full stack with compose watch"
 	@echo "  wf-producer-activity    - Start ProducerActivityWorkflow with EVENT_TYPE arg"
 	@echo "  wf-producer-workflow    - Start ProducerWorkflowWorkflow with EVENT_TYPE arg"
+	@echo "  wf-producer-signal      - Start ProducerSignalDispatcherWorkflow with EVENT_TYPE arg"
 
 up:
 	$(COMPOSE) up -d --build
@@ -73,5 +74,16 @@ wf-producer-workflow:
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
 	  --type ProducerWorkflowWorkflow \
 	  --workflow-id producer-workflow-$(EVENT_TYPE)-$$RANDOM \
+	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
+
+wf-producer-signal:
+	@if [ -z "$(EVENT_TYPE)" ]; then \
+		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-signal EVENT_TYPE=event.a"; \
+		exit 1; \
+	fi
+	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
+	  --tls=false --namespace default --task-queue pubsub-task-queue \
+	  --type ProducerSignalDispatcherWorkflow \
+	  --workflow-id producer-signal-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 

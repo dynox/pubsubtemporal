@@ -2,13 +2,23 @@ from __future__ import annotations
 
 import logging
 
-from temporalio import workflow
+from temporalio import activity, workflow
 
 from pubsub.models.events import ConsumerWorkflowInput, EventDispatchInput
-from pubsub.temporal.registry import get_subscribers
-from pubsub.temporal.registry import workflow as register_workflow
+from pubsub.temporal.registry import (
+    get_all_workflows,
+    get_subscribers,
+    register_activity,
+    register_workflow,
+)
 
 log = logging.getLogger(__name__)
+
+
+@register_activity
+@activity.defn
+async def get_subscribers_activity(input: EventDispatchInput) -> None:
+    log.error("all workflows ew", get_all_workflows())
 
 
 @register_workflow
@@ -17,20 +27,18 @@ class EventDispatcherWorkflow:
     @workflow.run
     async def run(self, input: EventDispatchInput) -> None:
         log.info(f"Fetching subscribers for event type: {input.event_type}")
+        await get_subscribers_activity(input)
         subscribers = get_subscribers(input.event_type)
         log.info(
             f"Found {len(subscribers)} subscribers for event type {input.event_type}"
         )
+        print("all workflows", get_all_workflows())
 
         for subscriber_workflow in subscribers:
-            workflow_name = subscriber_workflow.__name__
-            child_id = (
-                f"{workflow_name}-{input.event_type}-{workflow.info().workflow_id}"
-            )
-            log.info(f"Starting child workflow {workflow_name} with id {child_id}")
+            child_id = f"{subscriber_workflow}-{input.event_type}-{workflow.info().workflow_id}"
             consumer_input = ConsumerWorkflowInput(payload=input.payload)
             await workflow.start_child_workflow(
-                subscriber_workflow.run,
+                subscriber_workflow,
                 args=(consumer_input,),
                 id=child_id,
             )
