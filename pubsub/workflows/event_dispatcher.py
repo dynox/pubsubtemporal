@@ -5,7 +5,8 @@ import logging
 from temporalio import workflow
 
 from pubsub.models.events import ConsumerWorkflowInput, EventDispatchInput
-from pubsub.temporal.registry import get_subscribers, workflow as register_workflow
+from pubsub.temporal.registry import get_subscribers
+from pubsub.temporal.registry import workflow as register_workflow
 
 log = logging.getLogger(__name__)
 
