@@ -108,7 +108,7 @@ services:
       watch:
         - path: ./pubsub
           target: /app/pubsub
-          action: sync
+          action: sync+restart
         - path: ./pyproject.toml
           action: rebuild
         - path: ./uv.lock
