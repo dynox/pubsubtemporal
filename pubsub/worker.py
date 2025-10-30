@@ -7,6 +7,7 @@ import logging
 from temporalio.client import Client
 from temporalio.worker import Worker
 
+from pubsub.temporal.converter import create_data_converter
 from pubsub.temporal.registry import get_activities, get_workflows
 from pubsub.temporal.settings import TemporalSettings
 
@@ -39,11 +40,17 @@ async def run_worker() -> None:
     )
     settings = TemporalSettings()
 
+    # Import models first to ensure they're available
+    import pubsub.models  # noqa: F401
+
     # Discover workflows and activities by importing their packages
     _import_package_modules("pubsub.workflows")
     _import_package_modules("pubsub.activities")
 
-    client = await Client.connect(settings.address, namespace=settings.namespace)
+    data_converter = create_data_converter()
+    client = await Client.connect(
+        settings.address, namespace=settings.namespace, data_converter=data_converter
+    )
     workflows = list(get_workflows())
     activities = list(get_activities())
 

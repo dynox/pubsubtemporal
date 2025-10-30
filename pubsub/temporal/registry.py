@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Type
+from typing import Callable, Dict, Iterable, List, Mapping, Tuple, Type
 
 _registered_workflows: List[Type] = []
 _registered_activities: List[Callable] = []
+_event_subscribers: Dict[str, List[Type]] = {}
 
 
 def workflow(cls: Type) -> Type:
@@ -24,3 +25,24 @@ def get_workflows() -> Iterable[Type]:
 
 def get_activities() -> Iterable[Callable]:
     return tuple(_registered_activities)
+
+
+def subscribe(event_type: str) -> Callable[[Type], Type]:
+    def decorator(cls: Type) -> Type:
+        if event_type not in _event_subscribers:
+            _event_subscribers[event_type] = []
+        if cls not in _event_subscribers[event_type]:
+            _event_subscribers[event_type].append(cls)
+        if cls not in _registered_workflows:
+            _registered_workflows.append(cls)
+        return cls
+
+    return decorator
+
+
+def get_subscribers(event_type: str) -> Tuple[Type, ...]:
+    return tuple(_event_subscribers.get(event_type, ()))
+
+
+def get_all_subscriptions() -> Mapping[str, Tuple[Type, ...]]:
+    return {k: tuple(v) for k, v in _event_subscribers.items()}
