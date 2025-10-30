@@ -5,25 +5,11 @@ from datetime import timedelta
 
 from temporalio import workflow
 
-from pubsub.models.events import (
-    EventDispatchInput,
-    ProducerWorkflowInput,
-    ProducerWorkflowOutput,
-)
+from pubsub.models.events import EventDispatchInput
 from pubsub.temporal.registry import workflow as register_workflow
 from pubsub.workflows.event_dispatcher import EventDispatcherWorkflow
 
 log = logging.getLogger(__name__)
-
-
-@register_workflow
-@workflow.defn
-class ProducerWorkflow:
-    @workflow.run
-    async def run(self, input: ProducerWorkflowInput) -> ProducerWorkflowOutput:
-        log.info("ProducerWorkflow run")
-        value = input.name or "world"
-        return ProducerWorkflowOutput(message=f"Hello, {value}!")
 
 
 @register_workflow

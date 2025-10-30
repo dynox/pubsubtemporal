@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class ConsumerWorkflowA1:
     @workflow.run
     async def run(self, input: ConsumerWorkflowInput) -> None:
-        log.info("ConsumerWorkflowA1 executed")
+        log.info(f"ConsumerWorkflowA1 executed with input: {input.model_dump()}")
 
 
 @subscribe("event.a")
@@ -23,7 +23,7 @@ class ConsumerWorkflowA1:
 class ConsumerWorkflowA2:
     @workflow.run
     async def run(self, input: ConsumerWorkflowInput) -> None:
-        log.info("ConsumerWorkflowA2 executed")
+        log.info(f"ConsumerWorkflowA2 executed with input: {input.model_dump()}")
 
 
 @subscribe("event.b")
@@ -31,4 +31,4 @@ class ConsumerWorkflowA2:
 class ConsumerWorkflowB:
     @workflow.run
     async def run(self, input: ConsumerWorkflowInput) -> None:
-        log.info("ConsumerWorkflowB executed")
+        log.info(f"ConsumerWorkflowB executed with input: {input.model_dump()}")
