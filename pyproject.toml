@@ -9,3 +9,14 @@ dependencies = [
     "pydantic-settings>=2.4.0",
     "temporalio>=1.18.2",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "TID"]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["pubsub"]

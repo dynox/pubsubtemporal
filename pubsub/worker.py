@@ -3,9 +3,12 @@ from __future__ import annotations
 import asyncio
 import importlib
 import logging
+import pkgutil
 
 from temporalio.client import Client
 from temporalio.worker import Worker
+
+import pubsub.models  # noqa: F401
 
 from pubsub.temporal.converter import create_data_converter
 from pubsub.temporal.registry import get_activities, get_workflows
@@ -23,8 +26,6 @@ def _import_package_modules(package_name: str) -> None:
     if not pkg_path:
         return
     # Eagerly import submodules so decorators execute and register
-    import pkgutil
-
     for m in pkgutil.walk_packages(pkg.__path__, prefix=f"{package_name}."):
         try:
             importlib.import_module(m.name)
@@ -38,9 +39,6 @@ async def run_worker() -> None:
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
     settings = TemporalSettings()
-
-    # Import models first to ensure they're available
-    import pubsub.models  # noqa: F401
 
     # Discover workflows and activities by importing their packages
     _import_package_modules("pubsub.workflows")

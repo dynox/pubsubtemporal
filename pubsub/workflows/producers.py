@@ -6,7 +6,7 @@ from datetime import timedelta
 from temporalio import workflow
 
 from pubsub.models.events import EventDispatchInput
-from pubsub.temporal.registry import workflow as register_workflow
+from pubsub.temporal.registry import get_activities, workflow as register_workflow
 from pubsub.workflows.event_dispatcher import EventDispatcherWorkflow
 
 log = logging.getLogger(__name__)
@@ -18,8 +18,6 @@ class ProducerActivityWorkflow:
     @workflow.run
     async def run(self, input: EventDispatchInput) -> None:
         log.info(f"ProducerActivityWorkflow dispatching event: {input.event_type}")
-        from pubsub.temporal.registry import get_activities
-
         activities = list(get_activities())
         spawn_activity = next(
             (a for a in activities if a.__name__ == "spawn_event_subscribers"), None
