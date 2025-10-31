@@ -19,5 +19,5 @@ def activities(injector: Injector):
 
 @provider.provides("subscribers")
 def subscribers(injector: Injector) -> SubscriberRegistry:
-    _workflows = injector.get("workflows")
+    _workflows = injector.inject("workflows")
     return SubscriberRegistry.create(_workflows)
