@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
+from typing import TypeAlias
 
-from temporalio import activity
+from temporalio import activity, workflow
 from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 
 from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
 from pubsub.temporal.settings import TemporalSettings
-from pubsub.temporal.utils import get_subscribers, register_activity
+from pubsub.temporal.utils import (
+    get_all_workflows,
+    get_subscribers,
+    register_activity,
+    register_workflow,
+)
 
 log = logging.getLogger(__name__)
 
@@ -67,3 +74,38 @@ async def dispatch_event_with_signal(input: EventDispatchInput) -> None:
             )
         except Exception:
             pass
+
+
+@register_activity
+@activity.defn
+async def get_subscribers_activity(input: EventDispatchInput) -> None:
+    log.error("all workflows ew", get_all_workflows())
+
+
+@register_workflow
+@workflow.defn
+class EventDispatcherWorkflow:
+    Args: TypeAlias = EventDispatchInput
+
+    @workflow.run
+    async def run(self, args: Args) -> None:
+        log.info(f"Fetching subscribers for event type: {args.event_type}")
+        await workflow.execute_activity(
+            get_subscribers_activity,
+            args=(args,),
+            start_to_close_timeout=timedelta(seconds=60),
+        )
+        subscribers = get_subscribers(args.event_type)
+        log.info(
+            f"Found {len(subscribers)} subscribers for event type {args.event_type}"
+        )
+        for subscriber_workflow in subscribers:
+            child_id = (
+                f"{subscriber_workflow}-{args.event_type}-{workflow.info().workflow_id}"
+            )
+            consumer_input = ConsumerWorkflowInput(payload=args.payload)
+            await workflow.start_child_workflow(
+                subscriber_workflow,
+                args=(consumer_input,),
+                id=child_id,
+            )

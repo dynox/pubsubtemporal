@@ -14,9 +14,9 @@ help:
 	@echo "  worker-restart  - Restart worker"
 	@echo "  ps                      - Show compose services status"
 	@echo "  watch                   - Start full stack with compose watch"
-	@echo "  wf-producer-activity    - Start ProducerActivityWorkflow with EVENT_TYPE arg"
-	@echo "  wf-producer-workflow    - Start ProducerWorkflowWorkflow with EVENT_TYPE arg"
-	@echo "  wf-producer-signal      - Start ProducerSignalDispatcherWorkflow with EVENT_TYPE arg"
+	@echo "  wf-producer-activity    - Start ProducerActivity with EVENT_TYPE arg"
+	@echo "  wf-producer-workflow    - Start ProducerWorkflow with EVENT_TYPE arg"
+	@echo "  wf-producer-signal      - Start ProducerSignal with EVENT_TYPE arg"
 	@echo "  wf-registry-logger      - Start RegistryLoggerWorkflow to log all workflows and activities"
 
 up:
@@ -62,7 +62,7 @@ wf-producer-activity:
 	fi
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerActivityWorkflow \
+	  --type ProducerActivity \
 	  --workflow-id producer-activity-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
@@ -73,7 +73,7 @@ wf-producer-workflow:
 	fi
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerWorkflowWorkflow \
+	  --type ProducerWorkflow \
 	  --workflow-id producer-workflow-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
@@ -84,7 +84,7 @@ wf-producer-signal:
 	fi
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerSignalDispatcherWorkflow \
+	  --type ProducerSignal \
 	  --workflow-id producer-signal-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 

@@ -38,14 +38,19 @@ When using `docker compose watch` (via `make watch`), the worker container will 
 
 ### Triggering Workflows
 
-Start ProducerActivityWorkflow:
+Start ProducerActivity:
 ```bash
 make wf-producer-activity EVENT_TYPE=event.a
 ```
 
-Start ProducerWorkflowWorkflow:
+Start ProducerWorkflow:
 ```bash
 make wf-producer-workflow EVENT_TYPE=event.b
+```
+
+Start ProducerSignal:
+```bash
+make wf-producer-signal EVENT_TYPE=event.a
 ```
 
 ### Viewing Logs
