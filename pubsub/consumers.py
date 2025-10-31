@@ -4,7 +4,7 @@ import logging
 
 from temporalio import workflow
 
-from pubsub.model.events import ConsumerWorkflowInput
+from pubsub.events import ConsumerWorkflowInput
 from pubsub.temporal.utils import subscribe
 
 log = logging.getLogger(__name__)

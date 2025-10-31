@@ -6,7 +6,7 @@ from datetime import timedelta
 from temporalio import activity, workflow
 
 from pubsub.event_dispatchers import dispatch_event_with_signal, spawn_event_subscribers
-from pubsub.model.events import ConsumerWorkflowInput, EventDispatchInput
+from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
 from pubsub.temporal.utils import (
     get_all_workflows,
     get_subscribers,

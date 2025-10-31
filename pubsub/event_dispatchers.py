@@ -6,7 +6,7 @@ from temporalio import activity
 from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from pubsub.model.events import ConsumerWorkflowInput, EventDispatchInput
+from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
 from pubsub.temporal.utils import get_subscribers, register_activity
 from pubsub.temporal.settings import TemporalSettings
 
