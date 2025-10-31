@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from typing import TypeAlias
 
 from temporalio import workflow
 
@@ -20,10 +19,8 @@ log = logging.getLogger(__name__)
 @register_workflow
 @workflow.defn
 class ProducerActivity:
-    Args: TypeAlias = EventDispatchInput
-
     @workflow.run
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         log.info(f"ProducerActivity dispatching event: {args.event_type}")
         await workflow.execute_activity(
             SpawnEventSubscribers,
@@ -35,10 +32,8 @@ class ProducerActivity:
 @register_workflow
 @workflow.defn
 class ProducerWorkflow:
-    Args: TypeAlias = EventDispatchInput
-
     @workflow.run
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         log.info(f"ProducerWorkflow dispatching event: {args.event_type}")
         handle = await workflow.start_child_workflow(
             EventDispatcherWorkflow.run,
@@ -51,10 +46,8 @@ class ProducerWorkflow:
 @register_workflow
 @workflow.defn
 class ProducerSignal:
-    Args: TypeAlias = EventDispatchInput
-
     @workflow.run
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         log.info(f"ProducerSignal dispatching event: {args.event_type}")
         await workflow.execute_activity(
             DispatchEventWithSignal,

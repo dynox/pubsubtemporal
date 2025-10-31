@@ -16,8 +16,8 @@ log = logging.getLogger(__name__)
 async def run_worker() -> None:
     settings = TemporalSettings()
 
-    workflows = list(get_workflows())
-    activities = list(get_activities())
+    workflows = list(get_workflows("pubsub"))
+    activities = list(get_activities("pubsub"))
     for workflow in workflows:
         log.info(f"Workflow: {workflow.__name__}")
     for activity in activities:

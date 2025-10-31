@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from typing import TypeAlias
 
 from temporalio import activity, workflow
 from temporalio.client import Client
@@ -18,9 +17,7 @@ log = logging.getLogger(__name__)
 @register_activity
 @activity.defn
 class SpawnEventSubscribers:
-    Args: TypeAlias = EventDispatchInput
-
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
             wf
@@ -52,9 +49,7 @@ class SpawnEventSubscribers:
 @register_activity
 @activity.defn
 class DispatchEventWithSignal:
-    Args: TypeAlias = EventDispatchInput
-
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
             wf
@@ -90,19 +85,15 @@ class DispatchEventWithSignal:
 @register_activity
 @activity.defn
 class GetSubscribersActivity:
-    Args: TypeAlias = EventDispatchInput
-
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         pass
 
 
 @register_workflow
 @workflow.defn
 class EventDispatcherWorkflow:
-    Args: TypeAlias = EventDispatchInput
-
     @workflow.run
-    async def run(self, args: Args) -> None:
+    async def run(self, args: EventDispatchInput) -> None:
         log.info(f"Fetching subscribers for event type: {args.event_type}")
         await workflow.execute_activity(
             GetSubscribersActivity,
