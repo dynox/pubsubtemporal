@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 class EventPayload(BaseModel):
     data: dict = Field(default_factory=dict)
-    metadata: dict = Field(default_factory=dict)
 
 
 class EventDispatchInput(BaseModel):
