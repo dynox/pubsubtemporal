@@ -38,9 +38,7 @@ class DispatchWithTemporalClient:
 
         for subscriber_workflow in subscribers:
             workflow_name = subscriber_workflow.__name__
-            workflow_id = (
-                f"{workflow_name}-{args.event_type}-{activity.info().activity_id}"
-            )
+            workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
             consumer_input = ConsumerWorkflowInput(payload=args.payload)
             await client.start_workflow(
                 subscriber_workflow.run,
@@ -75,7 +73,7 @@ class DispatchWithSignalAndStart:
 
         for subscriber_workflow in subscribers:
             workflow_name = subscriber_workflow.__name__
-            workflow_id = f"{workflow_name}-{args.event_type}"
+            workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
 
             try:
                 await client.start_workflow(

@@ -20,7 +20,9 @@ log = logging.getLogger(__name__)
 class ProducerActivity:
     @workflow.run
     async def run(self, args: EventDispatchInput) -> None:
-        log.info(f"ProducerActivity dispatching event: {args.event_type}")
+        log.info(
+            f"ProducerActivity dispatching event: {args.event_type} (id: {args.id})"
+        )
         await workflow.execute_activity(
             DispatchWithTemporalClient.run,
             args=(args,),
@@ -33,7 +35,7 @@ class ProducerActivity:
 class ProducerSignal:
     @workflow.run
     async def run(self, args: EventDispatchInput) -> None:
-        log.info(f"ProducerSignal dispatching event: {args.event_type}")
+        log.info(f"ProducerSignal dispatching event: {args.event_type} (id: {args.id})")
         await workflow.execute_activity(
             DispatchWithSignalAndStart.run,
             args=(args,),
