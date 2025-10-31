@@ -5,7 +5,9 @@ import logging
 from pydio.injector import Injector
 from temporalio import activity
 from temporalio.client import Client
+from temporalio.common import WorkflowIDReusePolicy
 from temporalio.contrib.pydantic import pydantic_data_converter
+from temporalio.exceptions import WorkflowAlreadyStartedError
 
 from pubsub.events import EventDispatchInput, EventPayload
 from pubsub.registry import SubscriberRegistry
@@ -40,12 +42,16 @@ class DispatchWithTemporalClient:
             workflow_name = subscriber_workflow.__name__
             workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
             consumer_input = args.payload or EventPayload()
-            await client.start_workflow(
-                subscriber_workflow.run,
-                args=(consumer_input,),
-                id=workflow_id,
-                task_queue=settings.task_queue,
-            )
+            try:
+                await client.start_workflow(
+                    subscriber_workflow.run,
+                    args=(consumer_input,),
+                    id=workflow_id,
+                    task_queue=settings.task_queue,
+                    id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
+                )
+            except WorkflowAlreadyStartedError:
+                log.info(f"Workflow {workflow_id} already started")
 
 
 @register_activity
@@ -81,6 +87,7 @@ class DispatchWithSignalAndStart:
                     task_queue=settings.task_queue,
                     start_signal="process_event",
                     start_signal_args=[consumer_input],
+                    id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
                 )
-            except Exception:
-                pass
+            except WorkflowAlreadyStartedError:
+                log.info(f"Workflow {workflow_id} already started")

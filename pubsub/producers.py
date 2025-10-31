@@ -32,6 +32,31 @@ class ProducerActivity:
 
 @register_workflow
 @workflow.defn
+class ProducerActivityRepeated:
+    @workflow.run
+    async def run(self, args: EventDispatchInput) -> None:
+        log.info(
+            f"ProducerActivityRepeated dispatching event twice: "
+            f"{args.event_type} (id: {args.id})"
+        )
+        await workflow.execute_activity(
+            DispatchWithTemporalClient.run,
+            args=(args,),
+            start_to_close_timeout=timedelta(seconds=60),
+        )
+        log.info(
+            f"ProducerActivityRepeated second dispatch for event: "
+            f"{args.event_type} (id: {args.id})"
+        )
+        await workflow.execute_activity(
+            DispatchWithTemporalClient.run,
+            args=(args,),
+            start_to_close_timeout=timedelta(seconds=60),
+        )
+
+
+@register_workflow
+@workflow.defn
 class ProducerSignal:
     @workflow.run
     async def run(self, args: EventDispatchInput) -> None:
