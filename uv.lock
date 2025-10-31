@@ -44,6 +44,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "pydio" },
     { name = "temporalio" },
 ]
 
@@ -51,6 +52,7 @@ dependencies = [
 requires-dist = [
     { name = "pydantic", specifier = ">=2.12.3" },
     { name = "pydantic-settings", specifier = ">=2.4.0" },
+    { name = "pydio", specifier = ">=0.4.1" },
     { name = "temporalio", specifier = ">=1.18.2" },
 ]
 
@@ -138,6 +140,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/20/c5/dbbc27b814c71676593d1c3f718e6cd7d4f00652cefa24b75f7aa3efb25e/pydantic_settings-2.11.0.tar.gz", hash = "sha256:d0e87a1c7d33593beb7194adb8470fc426e95ba02af83a0f23474a04c9a08180", size = 188394 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/d6/887a1ff844e64aa823fb4905978d882a633cfe295c32eacad582b78a7d8b/pydantic_settings-2.11.0-py3-none-any.whl", hash = "sha256:fe2cea3413b9530d10f3a5875adffb17ada5c1e1bab0b2885546d7310415207c", size = 48608 },
+]
+
+[[package]]
+name = "pydio"
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/24/44/d0eb2f9d54d32eea446f80c471dbabfc6fb9e6b45c590ee2bbbe4abf4a54/pydio-0.4.1.tar.gz", hash = "sha256:3034a3d3227acf121af8dedccb638baf0970dc6383a71d90e74daa7697e9a96b", size = 11754 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/bd/9f72b6743879b38dab8be599401396c90b354b624e5f14427634b05320c2/pydio-0.4.1-py3-none-any.whl", hash = "sha256:8af3df9804feaefe6e540aebb11b5f83ca8e32eba7babf52c32a88963932df16", size = 14526 },
 ]
 
 [[package]]

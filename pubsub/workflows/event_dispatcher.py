@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import timedelta
 import logging
 
 from temporalio import activity, workflow
@@ -27,13 +28,15 @@ class EventDispatcherWorkflow:
     @workflow.run
     async def run(self, input: EventDispatchInput) -> None:
         log.info(f"Fetching subscribers for event type: {input.event_type}")
-        await get_subscribers_activity(input)
+        await workflow.execute_activity(
+            get_subscribers_activity,
+            args=(input,),
+            start_to_close_timeout=timedelta(seconds=60),
+        )
         subscribers = get_subscribers(input.event_type)
         log.info(
             f"Found {len(subscribers)} subscribers for event type {input.event_type}"
         )
-        print("all workflows", get_all_workflows())
-
         for subscriber_workflow in subscribers:
             child_id = f"{subscriber_workflow}-{input.event_type}-{workflow.info().workflow_id}"
             consumer_input = ConsumerWorkflowInput(payload=input.payload)

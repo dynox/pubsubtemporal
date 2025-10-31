@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.12.3",
     "pydantic-settings>=2.4.0",
+    "pydio>=0.4.1",
     "temporalio>=1.18.2",
 ]
 

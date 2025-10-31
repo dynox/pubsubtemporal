@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Callable, Dict, Iterable, List, Mapping, Tuple, Type
 
-global _registered_workflows
-
 _registered_workflows: dict[str, Type] = {}
 _registered_activities: List[Callable] = []
 _event_subscribers: Dict[str, List[Type]] = {}
@@ -15,7 +13,7 @@ def register_workflow(cls: Type) -> Type:
     return cls
 
 
-def regsiter_activity(fn: Callable) -> Callable:
+def register_activity(fn: Callable) -> Callable:
     if fn not in _registered_activities:
         _registered_activities.append(fn)
     return fn

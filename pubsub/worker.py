@@ -9,31 +9,11 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporalio.contrib.pydantic import pydantic_data_converter
+from pubsub.importer import import_package_modules
 from pubsub.temporal.registry import get_activities, get_workflows
 from pubsub.temporal.settings import TemporalSettings
 
 log = logging.getLogger(__name__)
-
-
-def _import_package_modules(package_name: str) -> None:
-    try:
-        root = importlib.import_module(package_name)
-    except Exception:
-        return
-
-    root_path = getattr(root, "__path__", None)
-    if not root_path:
-        return
-
-    for finder, name, is_pkg in pkgutil.iter_modules(root_path):
-        full_name = f"{package_name}.{name}"
-        try:
-            importlib.import_module(full_name)
-
-            if is_pkg:
-                _import_package_modules(full_name)
-        except Exception:
-            pass
 
 
 async def run_worker() -> None:
@@ -41,7 +21,7 @@ async def run_worker() -> None:
     settings = TemporalSettings()
 
     # Discover workflows and activities by importing their packages
-    _import_package_modules("pubsub")
+    import_package_modules("pubsub")
 
     workflows = list(get_workflows())
     activities = list(get_activities())
@@ -49,19 +29,19 @@ async def run_worker() -> None:
         log.info(f"Workflow: {workflow.__name__}")
     for activity in activities:
         log.info(f"Activity: {activity.__name__}")
-    # client = await Client.connect(
-    #     settings.address,
-    #     namespace=settings.namespace,
-    #     data_converter=pydantic_data_converter,
-    # )
-    # async with Worker(
-    #     client,
-    #     task_queue=settings.task_queue,
-    #     workflows=workflows,
-    #     activities=activities,
-    # ):
-    #     log.info("Worker started")
-    #     await asyncio.Event().wait()
+    client = await Client.connect(
+        settings.address,
+        namespace=settings.namespace,
+        data_converter=pydantic_data_converter,
+    )
+    async with Worker(
+        client,
+        task_queue=settings.task_queue,
+        workflows=workflows,
+        activities=activities,
+    ):
+        log.info("Worker started")
+        await asyncio.Event().wait()
 
 
 if __name__ == "__main__":

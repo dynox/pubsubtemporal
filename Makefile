@@ -2,7 +2,7 @@ SHELL := /bin/zsh
 
 COMPOSE := docker compose
 
-.PHONY: help up down restart logs worker worker-logs worker-restart ps watch watch-worker wf-producer-activity wf-producer-workflow wf-producer-signal
+.PHONY: help up down restart logs worker worker-logs worker-restart ps watch watch-worker wf-producer-activity wf-producer-workflow wf-producer-signal wf-registry-logger
 
 help:
 	@echo "Available targets:"
@@ -17,6 +17,7 @@ help:
 	@echo "  wf-producer-activity    - Start ProducerActivityWorkflow with EVENT_TYPE arg"
 	@echo "  wf-producer-workflow    - Start ProducerWorkflowWorkflow with EVENT_TYPE arg"
 	@echo "  wf-producer-signal      - Start ProducerSignalDispatcherWorkflow with EVENT_TYPE arg"
+	@echo "  wf-registry-logger      - Start RegistryLoggerWorkflow to log all workflows and activities"
 
 up:
 	$(COMPOSE) up -d --build
@@ -86,4 +87,10 @@ wf-producer-signal:
 	  --type ProducerSignalDispatcherWorkflow \
 	  --workflow-id producer-signal-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
+
+wf-registry-logger:
+	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
+	  --tls=false --namespace default --task-queue pubsub-task-queue \
+	  --type RegistryLoggerWorkflow \
+	  --workflow-id registry-logger-$$RANDOM 
 
