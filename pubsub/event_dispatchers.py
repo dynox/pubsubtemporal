@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import timedelta
 
+from pydio.injector import Injector
 from temporalio import activity, workflow
 from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
@@ -17,6 +18,9 @@ log = logging.getLogger(__name__)
 @register_activity
 @activity.defn
 class SpawnEventSubscribers:
+    def __init__(self, injector: Injector) -> None:
+        self.injector = injector
+
     async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
@@ -49,6 +53,9 @@ class SpawnEventSubscribers:
 @register_activity
 @activity.defn
 class DispatchEventWithSignal:
+    def __init__(self, injector: Injector) -> None:
+        self.injector = injector
+
     async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
@@ -85,6 +92,9 @@ class DispatchEventWithSignal:
 @register_activity
 @activity.defn
 class GetSubscribersActivity:
+    def __init__(self, injector: Injector) -> None:
+        self.injector = injector
+
     async def run(self, args: EventDispatchInput) -> None:
         pass
 

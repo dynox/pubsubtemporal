@@ -1,6 +1,7 @@
 from pydio.injector import Injector
 from pydio.provider import Provider
 
+from pubsub.registry import SubscriberRegistry
 from pubsub.temporal.utils import get_activities, get_workflows
 
 provider = Provider()
@@ -17,8 +18,6 @@ def activities(injector: Injector):
 
 
 @provider.provides("subscribers")
-def subscribers(injector: Injector):
+def subscribers(injector: Injector) -> SubscriberRegistry:
     _workflows = injector.get("workflows")
-
-
-injector = Injector(provider)
+    return SubscriberRegistry.create(_workflows)
