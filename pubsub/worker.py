@@ -9,9 +9,8 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporalio.contrib.pydantic import pydantic_data_converter
-from pubsub.importer import import_package_modules
-from pubsub.temporal.registry import get_activities, get_workflows
 from pubsub.temporal.settings import TemporalSettings
+from pubsub.temporal.utils import get_activities, get_workflows, import_package_modules
 
 log = logging.getLogger(__name__)
 

@@ -5,11 +5,11 @@ import logging
 
 from temporalio import workflow
 
-from pubsub.importer import import_package_modules
-from pubsub.temporal.registry import (
+from pubsub.temporal.utils import (
     get_activities,
     get_all_subscriptions,
     get_all_workflows,
+    import_package_modules,
     register_workflow,
 )
 
@@ -79,3 +79,4 @@ class RegistryLoggerWorkflow:
         total_subscribers = sum(len(subs) for subs in subscriptions.values())
         log.info(f"  Total Subscriptions: {total_subscribers}")
         log.info("=" * 80)
+
