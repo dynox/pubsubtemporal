@@ -10,76 +10,90 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 
 from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
 from pubsub.temporal.settings import TemporalSettings
-from pubsub.temporal.utils import (
-    get_all_workflows,
-    get_subscribers,
-    register_activity,
-    register_workflow,
-)
+from pubsub.temporal.utils import get_workflows, register_activity, register_workflow
 
 log = logging.getLogger(__name__)
 
 
 @register_activity
 @activity.defn
-async def spawn_event_subscribers(input: EventDispatchInput) -> None:
-    subscribers = get_subscribers(input.event_type)
+class SpawnEventSubscribers:
+    Args: TypeAlias = EventDispatchInput
 
-    settings = TemporalSettings()
-    client = await Client.connect(
-        settings.address,
-        namespace=settings.namespace,
-        data_converter=pydantic_data_converter,
-    )
+    async def run(self, args: Args) -> None:
+        workflows = get_workflows()
+        subscribers = [
+            wf
+            for wf in workflows
+            if getattr(wf, "__subscribed_on__", None) == args.event_type
+        ]
 
-    for subscriber_workflow in subscribers:
-        workflow_name = subscriber_workflow.__name__
-        workflow_id = (
-            f"{workflow_name}-{input.event_type}-{activity.info().activity_id}"
-        )
-        consumer_input = ConsumerWorkflowInput(payload=input.payload)
-        await client.start_workflow(
-            subscriber_workflow.run,
-            args=(consumer_input,),
-            id=workflow_id,
-            task_queue=settings.task_queue,
+        settings = TemporalSettings()
+        client = await Client.connect(
+            settings.address,
+            namespace=settings.namespace,
+            data_converter=pydantic_data_converter,
         )
 
-
-@register_activity
-@activity.defn
-async def dispatch_event_with_signal(input: EventDispatchInput) -> None:
-    subscribers = get_subscribers(input.event_type)
-
-    settings = TemporalSettings()
-    client = await Client.connect(
-        settings.address,
-        namespace=settings.namespace,
-        data_converter=pydantic_data_converter,
-    )
-
-    consumer_input = ConsumerWorkflowInput(payload=input.payload)
-
-    for subscriber_workflow in subscribers:
-        workflow_name = subscriber_workflow.__name__
-        workflow_id = f"{workflow_name}-{input.event_type}"
-
-        try:
+        for subscriber_workflow in subscribers:
+            workflow_name = subscriber_workflow.__name__
+            workflow_id = (
+                f"{workflow_name}-{args.event_type}-{activity.info().activity_id}"
+            )
+            consumer_input = ConsumerWorkflowInput(payload=args.payload)
             await client.start_workflow(
                 subscriber_workflow.run,
+                args=(consumer_input,),
                 id=workflow_id,
                 task_queue=settings.task_queue,
-                start_signal="process_event",
-                start_signal_args=[consumer_input],
             )
-        except Exception:
-            pass
 
 
 @register_activity
 @activity.defn
-async def get_subscribers_activity(input: EventDispatchInput) -> None:
-    log.error("all workflows ew", get_all_workflows())
+class DispatchEventWithSignal:
+    Args: TypeAlias = EventDispatchInput
+
+    async def run(self, args: Args) -> None:
+        workflows = get_workflows()
+        subscribers = [
+            wf
+            for wf in workflows
+            if getattr(wf, "__subscribed_on__", None) == args.event_type
+        ]
+
+        settings = TemporalSettings()
+        client = await Client.connect(
+            settings.address,
+            namespace=settings.namespace,
+            data_converter=pydantic_data_converter,
+        )
+
+        consumer_input = ConsumerWorkflowInput(payload=args.payload)
+
+        for subscriber_workflow in subscribers:
+            workflow_name = subscriber_workflow.__name__
+            workflow_id = f"{workflow_name}-{args.event_type}"
+
+            try:
+                await client.start_workflow(
+                    subscriber_workflow.run,
+                    id=workflow_id,
+                    task_queue=settings.task_queue,
+                    start_signal="process_event",
+                    start_signal_args=[consumer_input],
+                )
+            except Exception:
+                pass
+
+
+@register_activity
+@activity.defn
+class GetSubscribersActivity:
+    Args: TypeAlias = EventDispatchInput
+
+    async def run(self, args: Args) -> None:
+        pass
 
 
 @register_workflow
@@ -91,11 +105,16 @@ class EventDispatcherWorkflow:
     async def run(self, args: Args) -> None:
         log.info(f"Fetching subscribers for event type: {args.event_type}")
         await workflow.execute_activity(
-            get_subscribers_activity,
+            GetSubscribersActivity,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
-        subscribers = get_subscribers(args.event_type)
+        workflows = get_workflows()
+        subscribers = [
+            wf
+            for wf in workflows
+            if getattr(wf, "__subscribed_on__", None) == args.event_type
+        ]
         log.info(
             f"Found {len(subscribers)} subscribers for event type {args.event_type}"
         )

@@ -8,16 +8,13 @@ from temporalio.worker import Worker
 
 from temporalio.contrib.pydantic import pydantic_data_converter
 from pubsub.temporal.settings import TemporalSettings
-from pubsub.temporal.utils import get_activities, get_workflows, import_package_modules
+from pubsub.temporal.utils import get_activities, get_workflows
 
 log = logging.getLogger(__name__)
 
 
 async def run_worker() -> None:
     settings = TemporalSettings()
-
-    # Discover workflows and activities by importing their packages
-    import_package_modules("pubsub")
 
     workflows = list(get_workflows())
     activities = list(get_activities())

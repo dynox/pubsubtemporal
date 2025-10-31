@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
+from typing import Dict, List, Type
 
 from temporalio import workflow
 
 from pubsub.temporal.utils import (
     get_activities,
-    get_all_subscriptions,
-    get_all_workflows,
-    import_package_modules,
+    get_workflows,
     register_workflow,
 )
 
@@ -25,11 +24,17 @@ class RegistryLoggerWorkflow:
         log.info("REGISTRY REPORT")
         log.info("=" * 80)
 
-        import_package_modules("pubsub")
-
-        workflows = get_all_workflows()
+        workflows_list = list(get_workflows())
+        workflows = {wf.__name__: wf for wf in workflows_list}
         activities = list(get_activities())
-        subscriptions = get_all_subscriptions()
+
+        subscriptions: Dict[str, List[Type]] = {}
+        for wf in workflows_list:
+            if hasattr(wf, "__subscribed_on__"):
+                event_type = wf.__subscribed_on__
+                if event_type not in subscriptions:
+                    subscriptions[event_type] = []
+                subscriptions[event_type].append(wf)
 
         log.info("")
         log.info("REGISTERED WORKFLOWS")

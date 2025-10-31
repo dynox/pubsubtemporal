@@ -7,9 +7,9 @@ from typing import TypeAlias
 from temporalio import workflow
 
 from pubsub.event_dispatchers import (
+    DispatchEventWithSignal,
     EventDispatcherWorkflow,
-    dispatch_event_with_signal,
-    spawn_event_subscribers,
+    SpawnEventSubscribers,
 )
 from pubsub.events import EventDispatchInput
 from pubsub.temporal.utils import register_workflow
@@ -26,7 +26,7 @@ class ProducerActivity:
     async def run(self, args: Args) -> None:
         log.info(f"ProducerActivity dispatching event: {args.event_type}")
         await workflow.execute_activity(
-            spawn_event_subscribers,
+            SpawnEventSubscribers,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
@@ -57,7 +57,7 @@ class ProducerSignal:
     async def run(self, args: Args) -> None:
         log.info(f"ProducerSignal dispatching event: {args.event_type}")
         await workflow.execute_activity(
-            dispatch_event_with_signal,
+            DispatchEventWithSignal,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
