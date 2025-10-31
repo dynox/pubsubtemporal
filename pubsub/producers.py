@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
+from typing import TypeAlias
 
 from temporalio import activity, workflow
 
@@ -26,24 +27,25 @@ async def get_subscribers_activity(input: EventDispatchInput) -> None:
 @register_workflow
 @workflow.defn
 class EventDispatcherWorkflow:
+    Args: TypeAlias = EventDispatchInput
+
     @workflow.run
-    async def run(self, input: EventDispatchInput) -> None:
-        log.info(f"Fetching subscribers for event type: {input.event_type}")
+    async def run(self, args: Args) -> None:
+        log.info(f"Fetching subscribers for event type: {args.event_type}")
         await workflow.execute_activity(
             get_subscribers_activity,
-            args=(input,),
+            args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
-        subscribers = get_subscribers(input.event_type)
+        subscribers = get_subscribers(args.event_type)
         log.info(
-            f"Found {len(subscribers)} subscribers for event type {input.event_type}"
+            f"Found {len(subscribers)} subscribers for event type {args.event_type}"
         )
         for subscriber_workflow in subscribers:
             child_id = (
-                f"{subscriber_workflow}-{input.event_type}-"
-                f"{workflow.info().workflow_id}"
+                f"{subscriber_workflow}-{args.event_type}-{workflow.info().workflow_id}"
             )
-            consumer_input = ConsumerWorkflowInput(payload=input.payload)
+            consumer_input = ConsumerWorkflowInput(payload=args.payload)
             await workflow.start_child_workflow(
                 subscriber_workflow,
                 args=(consumer_input,),
@@ -54,12 +56,14 @@ class EventDispatcherWorkflow:
 @register_workflow
 @workflow.defn
 class ProducerActivityWorkflow:
+    Args: TypeAlias = EventDispatchInput
+
     @workflow.run
-    async def run(self, input: EventDispatchInput) -> None:
-        log.info(f"ProducerActivityWorkflow dispatching event: {input.event_type}")
+    async def run(self, args: Args) -> None:
+        log.info(f"ProducerActivityWorkflow dispatching event: {args.event_type}")
         await workflow.execute_activity(
             spawn_event_subscribers,
-            args=(input,),
+            args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
 
@@ -67,13 +71,15 @@ class ProducerActivityWorkflow:
 @register_workflow
 @workflow.defn
 class ProducerWorkflowWorkflow:
+    Args: TypeAlias = EventDispatchInput
+
     @workflow.run
-    async def run(self, input: EventDispatchInput) -> None:
-        log.info(f"ProducerWorkflowWorkflow dispatching event: {input.event_type}")
+    async def run(self, args: Args) -> None:
+        log.info(f"ProducerWorkflowWorkflow dispatching event: {args.event_type}")
         handle = await workflow.start_child_workflow(
             EventDispatcherWorkflow.run,
-            input,
-            id=f"event-dispatcher-{input.event_type}-{workflow.info().workflow_id}",
+            args,
+            id=f"event-dispatcher-{args.event_type}-{workflow.info().workflow_id}",
         )
         await handle
 
@@ -81,13 +87,15 @@ class ProducerWorkflowWorkflow:
 @register_workflow
 @workflow.defn
 class ProducerSignalDispatcherWorkflow:
+    Args: TypeAlias = EventDispatchInput
+
     @workflow.run
-    async def run(self, input: EventDispatchInput) -> None:
+    async def run(self, args: Args) -> None:
         log.info(
-            f"ProducerSignalDispatcherWorkflow dispatching event: {input.event_type}"
+            f"ProducerSignalDispatcherWorkflow dispatching event: {args.event_type}"
         )
         await workflow.execute_activity(
             dispatch_event_with_signal,
-            args=(input,),
+            args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
