@@ -27,7 +27,7 @@ down:
 
 restart:
 	$(COMPOSE) down
-	$(COMPOSE) up -d --build
+	$(COMPOSE) up -d --build 
 
 logs:
 	@SERVICES="$(filter-out $@,$(MAKECMDGOALS))"; \
@@ -53,40 +53,43 @@ ps:
 	$(COMPOSE) ps
 
 watch:
-	$(COMPOSE) up --watch
+	$(COMPOSE) up --build --watch
 
 wf-producer-activity:
 	@if [ -z "$(EVENT_TYPE)" ]; then \
 		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-activity EVENT_TYPE=event.a"; \
 		exit 1; \
 	fi
+	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
 	  --type ProducerActivity \
 	  --workflow-id producer-activity-$(EVENT_TYPE)-$$RANDOM \
-	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
+	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
 wf-producer-workflow:
 	@if [ -z "$(EVENT_TYPE)" ]; then \
 		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-workflow EVENT_TYPE=event.a"; \
 		exit 1; \
 	fi
+	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
 	  --type ProducerWorkflow \
 	  --workflow-id producer-workflow-$(EVENT_TYPE)-$$RANDOM \
-	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
+	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
 wf-producer-signal:
 	@if [ -z "$(EVENT_TYPE)" ]; then \
 		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-signal EVENT_TYPE=event.a"; \
 		exit 1; \
 	fi
+	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
 	  --type ProducerSignal \
 	  --workflow-id producer-signal-$(EVENT_TYPE)-$$RANDOM \
-	  --input "{\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
+	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
 wf-registry-logger:
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \

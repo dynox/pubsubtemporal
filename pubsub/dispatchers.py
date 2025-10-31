@@ -7,7 +7,7 @@ from temporalio import activity
 from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 
-from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
+from pubsub.events import EventDispatchInput, EventPayload
 from pubsub.registry import SubscriberRegistry
 from pubsub.temporal.settings import TemporalSettings
 from pubsub.temporal.utils import register_activity
@@ -39,7 +39,7 @@ class DispatchWithTemporalClient:
         for subscriber_workflow in subscribers:
             workflow_name = subscriber_workflow.__name__
             workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
-            consumer_input = ConsumerWorkflowInput(payload=args.payload)
+            consumer_input = args.payload or EventPayload()
             await client.start_workflow(
                 subscriber_workflow.run,
                 args=(consumer_input,),
@@ -69,11 +69,10 @@ class DispatchWithSignalAndStart:
             data_converter=pydantic_data_converter,
         )
 
-        consumer_input = ConsumerWorkflowInput(payload=args.payload)
-
         for subscriber_workflow in subscribers:
             workflow_name = subscriber_workflow.__name__
             workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
+            consumer_input = args.payload or EventPayload()
 
             try:
                 await client.start_workflow(
