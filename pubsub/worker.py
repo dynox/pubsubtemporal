@@ -37,7 +37,11 @@ async def run_worker() -> None:
         client,
         task_queue=settings.task_queue,
         workflows=workflow_classes,
-        activities=[activity_cls(injector) for activity_cls in activities_classes],
+        activities=[activity_cls(injector).run for activity_cls in activities_classes],
     ):
         log.info("Worker started")
         await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
+    asyncio.run(run_worker())

@@ -16,11 +16,11 @@ log = logging.getLogger(__name__)
 
 
 @register_activity
-@activity.defn
 class SpawnEventSubscribers:
     def __init__(self, injector: Injector) -> None:
         self.injector = injector
 
+    @activity.defn(name="SpawnEventSubscribers")
     async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
@@ -51,11 +51,11 @@ class SpawnEventSubscribers:
 
 
 @register_activity
-@activity.defn
 class DispatchEventWithSignal:
     def __init__(self, injector: Injector) -> None:
         self.injector = injector
 
+    @activity.defn
     async def run(self, args: EventDispatchInput) -> None:
         workflows = get_workflows()
         subscribers = [
@@ -90,11 +90,11 @@ class DispatchEventWithSignal:
 
 
 @register_activity
-@activity.defn
 class GetSubscribersActivity:
     def __init__(self, injector: Injector) -> None:
         self.injector = injector
 
+    @activity.defn(name="GetSubscribersActivity")
     async def run(self, args: EventDispatchInput) -> None:
         pass
 
@@ -106,7 +106,7 @@ class EventDispatcherWorkflow:
     async def run(self, args: EventDispatchInput) -> None:
         log.info(f"Fetching subscribers for event type: {args.event_type}")
         await workflow.execute_activity(
-            GetSubscribersActivity,
+            GetSubscribersActivity.run,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )

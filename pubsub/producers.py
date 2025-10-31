@@ -23,7 +23,7 @@ class ProducerActivity:
     async def run(self, args: EventDispatchInput) -> None:
         log.info(f"ProducerActivity dispatching event: {args.event_type}")
         await workflow.execute_activity(
-            SpawnEventSubscribers,
+            SpawnEventSubscribers.run,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
@@ -50,7 +50,7 @@ class ProducerSignal:
     async def run(self, args: EventDispatchInput) -> None:
         log.info(f"ProducerSignal dispatching event: {args.event_type}")
         await workflow.execute_activity(
-            DispatchEventWithSignal,
+            DispatchEventWithSignal.run,
             args=(args,),
             start_to_close_timeout=timedelta(seconds=60),
         )
