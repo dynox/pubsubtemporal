@@ -5,13 +5,13 @@ import logging
 
 from temporalio import workflow
 
+from pubsub.importer import import_package_modules
 from pubsub.temporal.registry import (
     get_activities,
     get_all_subscriptions,
     get_all_workflows,
     register_workflow,
 )
-from pubsub.importer import import_package_modules
 
 log = logging.getLogger(__name__)
 
