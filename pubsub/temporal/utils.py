@@ -22,6 +22,7 @@ def register_activity(cls: Type) -> Type:
 def subscribe(event_type: str) -> Callable[[Type], Type]:
     def decorator(cls: Type) -> Type:
         cls.__subscribed_on__ = event_type
+        cls.__object_type__ = "workflow"
         return cls
 
     return decorator

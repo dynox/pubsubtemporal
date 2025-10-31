@@ -5,12 +5,11 @@ import logging
 from temporalio import workflow
 
 from pubsub.events import ConsumerWorkflowInput
-from pubsub.temporal.utils import register_workflow, subscribe
+from pubsub.temporal.utils import subscribe
 
 log = logging.getLogger(__name__)
 
 
-@register_workflow
 @subscribe("event.a")
 @workflow.defn
 class ConsumerA:
@@ -28,7 +27,6 @@ class ConsumerA:
         self.event = event
 
 
-@register_workflow
 @subscribe("event.a")
 @workflow.defn
 class ConsumerB:
@@ -46,7 +44,6 @@ class ConsumerB:
         self.event = event
 
 
-@register_workflow
 @subscribe("event.b")
 @workflow.defn
 class ConsumerC:
