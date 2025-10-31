@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 
 async def run_worker() -> None:
-
     settings = TemporalSettings()
 
     # Discover workflows and activities by importing their packages

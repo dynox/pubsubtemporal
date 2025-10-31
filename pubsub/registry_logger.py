@@ -79,4 +79,3 @@ class RegistryLoggerWorkflow:
         total_subscribers = sum(len(subs) for subs in subscriptions.values())
         log.info(f"  Total Subscriptions: {total_subscribers}")
         log.info("=" * 80)
-

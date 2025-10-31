@@ -13,7 +13,6 @@ log = logging.getLogger(__name__)
 @subscribe("event.a")
 @workflow.defn
 class ConsumerWorkflowA1:
-
     def __init__(self) -> None:
         self.event: ConsumerWorkflowInput | None = None
 
@@ -31,7 +30,6 @@ class ConsumerWorkflowA1:
 @subscribe("event.a")
 @workflow.defn
 class ConsumerWorkflowA2:
-
     def __init__(self) -> None:
         self.event: ConsumerWorkflowInput | None = None
 
@@ -49,7 +47,6 @@ class ConsumerWorkflowA2:
 @subscribe("event.b")
 @workflow.defn
 class ConsumerWorkflowB:
-
     def __init__(self) -> None:
         self.event: ConsumerWorkflowInput | None = None
 
