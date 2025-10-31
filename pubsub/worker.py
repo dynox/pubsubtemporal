@@ -1,9 +1,7 @@
 from __future__ import annotations  # noqa: I001
 
 import asyncio
-import importlib
 import logging
-import pkgutil
 
 from temporalio.client import Client
 from temporalio.worker import Worker

@@ -39,7 +39,10 @@ class EventDispatcherWorkflow:
             f"Found {len(subscribers)} subscribers for event type {input.event_type}"
         )
         for subscriber_workflow in subscribers:
-            child_id = f"{subscriber_workflow}-{input.event_type}-{workflow.info().workflow_id}"
+            child_id = (
+                f"{subscriber_workflow}-{input.event_type}-"
+                f"{workflow.info().workflow_id}"
+            )
             consumer_input = ConsumerWorkflowInput(payload=input.payload)
             await workflow.start_child_workflow(
                 subscriber_workflow,

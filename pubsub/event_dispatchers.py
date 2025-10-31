@@ -7,8 +7,8 @@ from temporalio.client import Client
 from temporalio.contrib.pydantic import pydantic_data_converter
 
 from pubsub.events import ConsumerWorkflowInput, EventDispatchInput
-from pubsub.temporal.utils import get_subscribers, register_activity
 from pubsub.temporal.settings import TemporalSettings
+from pubsub.temporal.utils import get_subscribers, register_activity
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ async def dispatch_event_with_signal(input: EventDispatchInput) -> None:
         workflow_id = f"{workflow_name}-{input.event_type}"
 
         try:
-            handle = await client.start_workflow(
+            await client.start_workflow(
                 subscriber_workflow.run,
                 id=workflow_id,
                 task_queue=settings.task_queue,

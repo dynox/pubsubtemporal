@@ -1,0 +1,10 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.3
+    hooks:
+      # ruff --fix automatically fixes errors in place and stages the changes
+      - id: ruff
+        args: [--fix]
+      # ruff-format formats code in place
+      - id: ruff-format
+
