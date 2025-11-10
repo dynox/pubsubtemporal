@@ -11,10 +11,7 @@ help:
 	@echo "  restart         - Restart all services"
 	@echo "  logs [SERVICE...] - Tail all services logs (or specific service(s) if provided)"
 	@echo "  watch                   - Start full stack with compose watch"
-	@echo "  wf-producer-activity          - Start ProducerActivity with EVENT_TYPE arg"
-	@echo "  wf-producer-activity-repeated - Start ProducerActivityRepeated with EVENT_TYPE arg"
-	@echo "  wf-producer-signal            - Start ProducerSignal with EVENT_TYPE arg"
-	@echo "  wf-registry-logger            - Start RegistryLoggerWorkflow to log all workflows and activities"
+	@echo "  wf-producer          - Start ProducerActivity with EVENT_TYPE arg"
 
 up:
 	$(COMPOSE) up -d --build
@@ -40,40 +37,16 @@ logs:
 watch:
 	$(COMPOSE) up --build --watch
 
-wf-producer-activity:
+wf-producer:
 	@if [ -z "$(EVENT_TYPE)" ]; then \
-		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-activity EVENT_TYPE=event.a"; \
+		echo "Error: EVENT_TYPE is required. Usage: make wf-producer EVENT_TYPE=event.a"; \
 		exit 1; \
 	fi
 	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
 	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
 	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerActivity \
+	  --type Producer \
 	  --workflow-id producer-activity-$(EVENT_TYPE)-$$RANDOM \
-	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
-
-wf-producer-activity-repeated:
-	@if [ -z "$(EVENT_TYPE)" ]; then \
-		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-activity-repeated EVENT_TYPE=event.a"; \
-		exit 1; \
-	fi
-	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
-	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
-	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerActivityRepeated \
-	  --workflow-id producer-activity-repeated-$(EVENT_TYPE)-$$RANDOM \
-	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
-
-wf-producer-signal:
-	@if [ -z "$(EVENT_TYPE)" ]; then \
-		echo "Error: EVENT_TYPE is required. Usage: make wf-producer-signal EVENT_TYPE=event.a"; \
-		exit 1; \
-	fi
-	@EVENT_ID=$$(python3 -c "import uuid; print(uuid.uuid4())"); \
-	$(COMPOSE) exec temporal-admin-tools temporal workflow start \
-	  --tls=false --namespace default --task-queue pubsub-task-queue \
-	  --type ProducerSignal \
-	  --workflow-id producer-signal-$(EVENT_TYPE)-$$RANDOM \
 	  --input "{\"id\":\"$$EVENT_ID\",\"event_type\":\"$(EVENT_TYPE)\",\"payload\":null}"
 
 wf-registry-logger:
