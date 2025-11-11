@@ -12,3 +12,4 @@ class TemporalSettings(BaseSettings):
     address: str = Field(default="localhost:7233")
     namespace: str = Field(default="default")
     task_queue: str = Field(default="pubsub-task-queue")
+    task_queue_secondary: str = Field(default="pubsub-task-queue-secondary")

@@ -27,7 +27,7 @@ class ConsumerA:
         self.event = event
 
 
-@subscribe("event.a")
+@subscribe("event.a", task_queue="pubsub-task-queue-secondary")
 @workflow.defn
 class ConsumerB:
     def __init__(self) -> None:

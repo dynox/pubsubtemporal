@@ -122,6 +122,36 @@ services:
           target: /tmp/docker-compose.yml
           action: sync+restart
 
+  worker-secondary:
+    build: .
+    depends_on:
+      - temporal
+    env_file:
+      - .env
+    command: ["python", "-m", "pubsub.worker_secondary"]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    develop:
+      watch:
+        - path: ./pubsub
+          target: /app/pubsub
+          action: sync+restart
+        - path: ./pyproject.toml
+          action: rebuild
+        - path: ./uv.lock
+          action: rebuild
+        - path: ./Dockerfile
+          action: rebuild
+        - path: ./.env
+          target: /app/.env
+          action: sync+restart
+        - path: ./docker-compose.yml
+          target: /tmp/docker-compose.yml
+          action: sync+restart
+
 volumes:
   temporal-postgres:
 
