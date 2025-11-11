@@ -11,7 +11,7 @@ from temporalio.contrib.pydantic import pydantic_data_converter
 from pubsub.temporal.settings import TemporalSettings
 from pubsub.temporal.utils import get_activities
 from pubsub.di import provider
-from pubsub.consumers import ConsumerB
+from pubsub.domain_b.consumers import ConsumerB
 
 log = logging.getLogger(__name__)
 
