@@ -4,7 +4,7 @@ import logging
 
 from temporalio import workflow
 
-from pubsub.dispatchers import Dispatcher
+from pubsub.common.dispatchers import Dispatcher
 from pubsub.events import EventDispatchInput
 from pubsub.temporal.utils import register_workflow
 
