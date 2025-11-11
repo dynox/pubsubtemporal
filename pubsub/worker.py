@@ -18,9 +18,15 @@ log = logging.getLogger(__name__)
 async def run_worker() -> None:
     settings = TemporalSettings()
 
-    workflow_classes = list(get_workflows("pubsub"))
-    activities_classes = list(get_activities("pubsub"))
+    # Load workflows and activities from domain_a and common
+    workflow_classes = list(get_workflows("pubsub.domain_a")) + list(
+        get_workflows("pubsub.common")
+    )
+    activities_classes = list(get_activities("pubsub.domain_a")) + list(
+        get_activities("pubsub.common")
+    )
 
+    log.info("Primary worker loading workflows and activities from domain_a and common")
     for workflow in workflow_classes:
         log.info(f"Workflow: {workflow.__name__}")
     for activity in activities_classes:

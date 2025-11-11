@@ -9,9 +9,8 @@ from temporalio.worker import Worker
 
 from temporalio.contrib.pydantic import pydantic_data_converter
 from pubsub.temporal.settings import TemporalSettings
-from pubsub.temporal.utils import get_activities
+from pubsub.temporal.utils import get_activities, get_workflows
 from pubsub.di import provider
-from pubsub.domain_b.consumers import ConsumerB
 
 log = logging.getLogger(__name__)
 
@@ -19,10 +18,11 @@ log = logging.getLogger(__name__)
 async def run_worker() -> None:
     settings = TemporalSettings()
 
-    # Only register ConsumerB for this worker
-    workflow_classes = [ConsumerB]
-    activities_classes = list(get_activities("pubsub"))
+    # Load workflows and activities from domain_b only
+    workflow_classes = list(get_workflows("pubsub.domain_b"))
+    activities_classes = list(get_activities("pubsub.domain_b"))
 
+    log.info("Secondary worker loading workflows and activities from domain_b")
     for workflow in workflow_classes:
         log.info(f"Workflow: {workflow.__name__}")
     for activity in activities_classes:
