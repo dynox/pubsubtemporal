@@ -19,9 +19,10 @@ def register_activity(cls: Type) -> Type:
     return cls
 
 
-def subscribe(event_type: str) -> Callable[[Type], Type]:
+def subscribe(event_type: str, task_queue: str | None = None) -> Callable[[Type], Type]:
     def decorator(cls: Type) -> Type:
         cls.__subscribed_on__ = event_type
+        cls.__task_queue__ = task_queue
         cls.__object_type__ = "workflow"
         return cls
 

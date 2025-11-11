@@ -55,12 +55,16 @@ class DispatcherActivity:
             workflow_name = subscriber_workflow.__name__
             workflow_id = f"{workflow_name}-{args.event_type}-{args.id}"
             consumer_input = args.payload or EventPayload()
+            task_queue = (
+                getattr(subscriber_workflow, "__task_queue__", None)
+                or settings.task_queue
+            )
             try:
                 await client.start_workflow(
                     subscriber_workflow.run,
                     args=(consumer_input,),
                     id=workflow_id,
-                    task_queue=settings.task_queue,
+                    task_queue=task_queue,
                     id_reuse_policy=WorkflowIDReusePolicy.REJECT_DUPLICATE,
                 )
             except WorkflowAlreadyStartedError:
