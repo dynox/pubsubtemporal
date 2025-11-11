@@ -8,9 +8,6 @@ from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporalio.contrib.pydantic import pydantic_data_converter
-from pubsub.temporal.search_attributes import (
-    register_search_attributes_from_workflows,
-)
 from pubsub.temporal.settings import TemporalSettings
 from pubsub.temporal.utils import get_activities, get_workflows
 from pubsub.di import provider
@@ -37,7 +34,6 @@ async def run_worker() -> None:
         data_converter=pydantic_data_converter,
     )
 
-    await register_search_attributes_from_workflows(workflow_classes, client)
     async with Worker(
         client,
         task_queue=settings.task_queue,
